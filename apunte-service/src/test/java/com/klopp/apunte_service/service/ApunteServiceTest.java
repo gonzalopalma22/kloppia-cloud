@@ -3,6 +3,7 @@ package com.klopp.apunte_service.service;
 import com.klopp.apunte_service.dto.ApunteResponseDTO;
 import com.klopp.apunte_service.model.Apunte;
 import com.klopp.apunte_service.repository.ApunteRepository;
+import com.klopp.apunte_service.repository.ChatRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,6 +26,9 @@ class ApunteServiceTest {
 
     @Mock
     private ApunteRepository apunteRepository;
+
+    @Mock
+    private ChatRepository chatRepository;
 
     @Mock
     private GeminiService geminiService;
@@ -117,6 +121,7 @@ class ApunteServiceTest {
         apunteService.eliminar(1L, USUARIO_ID);
 
         verify(apunteRepository, times(1)).deleteById(1L);
+        verify(chatRepository, times(1)).deleteByApunteIdAndUsuarioId(1L, USUARIO_ID);
     }
 
     @Test
