@@ -1,0 +1,207 @@
+{
+  "info": {
+    "name": "Klopp Backend — Apuntesia",
+    "description": "Colección de endpoints para el backend de Apuntesia. Todos los requests pasan por el API Gateway en localhost:8080.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080", "type": "string" },
+    { "key": "token", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "description": "Registro e inicio de sesión. No requieren token.",
+      "item": [
+        {
+          "name": "Registro",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/auth/registro", "host": ["{{baseUrl}}"], "path": ["api", "auth", "registro"] },
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Gonzalo\",\n  \"apellido\": \"Palma\",\n  \"email\": \"gonzalo@ejemplo.com\",\n  \"password\": \"miContraseña123\"\n}" }
+          },
+          "response": [{ "name": "201 Created", "status": "Created", "code": 201, "body": "{\n  \"id\": 1,\n  \"nombre\": \"Gonzalo\",\n  \"apellido\": \"Palma\",\n  \"email\": \"gonzalo@ejemplo.com\",\n  \"rol\": \"ROLE_USER\"\n}" }]
+        },
+        {
+          "name": "Login",
+          "event": [{ "listen": "test", "script": { "exec": ["const res = pm.response.json();", "if (res.token) {", "  pm.collectionVariables.set('token', res.token);", "}"], "type": "text/javascript" } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] },
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"gonzalo@ejemplo.com\",\n  \"password\": \"miContraseña123\"\n}" }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiJ9...\",\n  \"nombre\": \"Gonzalo\",\n  \"apellido\": \"Palma\",\n  \"email\": \"gonzalo@ejemplo.com\",\n  \"rol\": \"ROLE_USER\"\n}" }]
+        }
+      ]
+    },
+    {
+      "name": "Materias",
+      "description": "CRUD de materias. Requieren token JWT en el header Authorization.",
+      "item": [
+        {
+          "name": "Crear Materia",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/materias", "host": ["{{baseUrl}}"], "path": ["api", "materias"] },
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Programación Avanzada\",\n  \"descripcion\": \"Curso de estructuras de datos y algoritmos\"\n}" }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{\n  \"id\": 1,\n  \"nombre\": \"Programación Avanzada\",\n  \"descripcion\": \"Curso de estructuras de datos y algoritmos\",\n  \"usuarioId\": 1\n}" }]
+        },
+        {
+          "name": "Listar Materias",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/materias", "host": ["{{baseUrl}}"], "path": ["api", "materias"] }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "[\n  {\n    \"id\": 1,\n    \"nombre\": \"Programación Avanzada\",\n    \"descripcion\": \"Curso de estructuras de datos y algoritmos\",\n    \"usuarioId\": 1\n  }\n]" }]
+        },
+        {
+          "name": "Obtener Materia por ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/materias/1", "host": ["{{baseUrl}}"], "path": ["api", "materias", "1"] }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{\n  \"id\": 1,\n  \"nombre\": \"Programación Avanzada\",\n  \"descripcion\": \"Curso de estructuras de datos y algoritmos\",\n  \"usuarioId\": 1\n}" }]
+        },
+        {
+          "name": "Editar Materia",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/materias/1", "host": ["{{baseUrl}}"], "path": ["api", "materias", "1"] },
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Programación Avanzada II\",\n  \"descripcion\": \"Descripción actualizada\"\n}" }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{\n  \"id\": 1,\n  \"nombre\": \"Programación Avanzada II\",\n  \"descripcion\": \"Descripción actualizada\",\n  \"usuarioId\": 1\n}" }]
+        },
+        {
+          "name": "Buscar Materias por Nombre",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/materias/buscar?nombre=Programación", "host": ["{{baseUrl}}"], "path": ["api", "materias", "buscar"], "query": [{ "key": "nombre", "value": "Programación" }] }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "[\n  {\n    \"id\": 1,\n    \"nombre\": \"Programación Avanzada\",\n    \"usuarioId\": 1\n  }\n]" }]
+        },
+        {
+          "name": "Eliminar Materia",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/materias/1", "host": ["{{baseUrl}}"], "path": ["api", "materias", "1"] }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "\"Materia eliminada correctamente\"" }]
+        }
+      ]
+    },
+    {
+      "name": "Apuntes",
+      "description": "Gestión de apuntes PDF con resúmenes generados por IA. Requieren token JWT.",
+      "item": [
+        {
+          "name": "Subir Apunte (PDF)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/materias/1/apuntes", "host": ["{{baseUrl}}"], "path": ["api", "materias", "1", "apuntes"] },
+            "body": { "mode": "formdata", "formdata": [{ "key": "titulo", "value": "Clase 1 - Introducción", "type": "text" }, { "key": "archivo", "type": "file", "src": "" }] }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{\n  \"id\": 1,\n  \"titulo\": \"Clase 1 - Introducción\",\n  \"resumen\": \"Resumen generado por IA...\",\n  \"nombreArchivo\": \"apunte.pdf\",\n  \"materiaId\": 1,\n  \"usuarioId\": 1,\n  \"createdAt\": \"2026-06-27T10:30:00\"\n}" }]
+        },
+        {
+          "name": "Listar Apuntes de una Materia",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/materias/1/apuntes", "host": ["{{baseUrl}}"], "path": ["api", "materias", "1", "apuntes"] }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "[\n  {\n    \"id\": 1,\n    \"titulo\": \"Clase 1 - Introducción\",\n    \"resumen\": \"Resumen generado por IA...\",\n    \"nombreArchivo\": \"apunte.pdf\",\n    \"materiaId\": 1,\n    \"usuarioId\": 1,\n    \"createdAt\": \"2026-06-27T10:30:00\"\n  }\n]" }]
+        },
+        {
+          "name": "Obtener Apunte por ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/materias/1/apuntes/1", "host": ["{{baseUrl}}"], "path": ["api", "materias", "1", "apuntes", "1"] }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{\n  \"id\": 1,\n  \"titulo\": \"Clase 1 - Introducción\",\n  \"resumen\": \"Resumen generado por IA...\",\n  \"nombreArchivo\": \"apunte.pdf\",\n  \"materiaId\": 1,\n  \"usuarioId\": 1,\n  \"createdAt\": \"2026-06-27T10:30:00\"\n}" }]
+        },
+        {
+          "name": "Editar Título de Apunte",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/materias/1/apuntes/1", "host": ["{{baseUrl}}"], "path": ["api", "materias", "1", "apuntes", "1"] },
+            "body": { "mode": "raw", "raw": "{\n  \"titulo\": \"Clase 1 - Introducción Actualizada\"\n}" }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{\n  \"id\": 1,\n  \"titulo\": \"Clase 1 - Introducción Actualizada\",\n  \"resumen\": \"Resumen generado por IA...\",\n  \"nombreArchivo\": \"apunte.pdf\",\n  \"materiaId\": 1,\n  \"usuarioId\": 1,\n  \"createdAt\": \"2026-06-27T10:30:00\"\n}" }]
+        },
+        {
+          "name": "Buscar Apuntes por Título",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/materias/1/apuntes/buscar?titulo=Introducción", "host": ["{{baseUrl}}"], "path": ["api", "materias", "1", "apuntes", "buscar"], "query": [{ "key": "titulo", "value": "Introducción" }] }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "[\n  {\n    \"id\": 1,\n    \"titulo\": \"Clase 1 - Introducción\",\n    \"materiaId\": 1\n  }\n]" }]
+        },
+        {
+          "name": "Eliminar Apunte",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/materias/1/apuntes/1", "host": ["{{baseUrl}}"], "path": ["api", "materias", "1", "apuntes", "1"] }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "\"Apunte eliminado correctamente\"" }]
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "description": "Gestión de usuarios. Requieren token JWT con rol ROLE_ADMIN.",
+      "item": [
+        {
+          "name": "Listar Usuarios",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/auth/admin/users", "host": ["{{baseUrl}}"], "path": ["api", "auth", "admin", "users"] }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "[\n  {\n    \"id\": 1,\n    \"nombre\": \"Gonzalo\",\n    \"apellido\": \"Palma\",\n    \"email\": \"gonzalo@ejemplo.com\",\n    \"rol\": \"ROLE_ADMIN\"\n  }\n]" }]
+        },
+        {
+          "name": "Obtener Usuario por ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/auth/admin/users/1", "host": ["{{baseUrl}}"], "path": ["api", "auth", "admin", "users", "1"] }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{\n  \"id\": 1,\n  \"nombre\": \"Gonzalo\",\n  \"apellido\": \"Palma\",\n  \"email\": \"gonzalo@ejemplo.com\",\n  \"rol\": \"ROLE_ADMIN\"\n}" }]
+        },
+        {
+          "name": "Editar Usuario",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/auth/admin/users/2", "host": ["{{baseUrl}}"], "path": ["api", "auth", "admin", "users", "2"] },
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Juan\",\n  \"apellido\": \"Pérez\",\n  \"email\": \"juan@ejemplo.com\",\n  \"rol\": \"ROLE_ADMIN\"\n}" }
+          },
+          "response": [{ "name": "200 OK", "status": "OK", "code": 200, "body": "{\n  \"id\": 2,\n  \"nombre\": \"Juan\",\n  \"apellido\": \"Pérez\",\n  \"email\": \"juan@ejemplo.com\",\n  \"rol\": \"ROLE_ADMIN\"\n}" }]
+        },
+        {
+          "name": "Eliminar Usuario",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/api/auth/admin/users/2", "host": ["{{baseUrl}}"], "path": ["api", "auth", "admin", "users", "2"] }
+          },
+          "response": [{ "name": "204 No Content", "status": "No Content", "code": 204, "body": "" }]
+        }
+      ]
+    }
+  ]
+}
