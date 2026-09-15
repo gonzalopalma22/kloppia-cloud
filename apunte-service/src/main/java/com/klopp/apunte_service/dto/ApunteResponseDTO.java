@@ -15,6 +15,6 @@ public class ApunteResponseDTO {
     private String resumen;
     private String nombreArchivo;
     private Long materiaId;
-    private Long usuarioId;
+    private String usuarioId;
     private LocalDateTime createdAt;
 }

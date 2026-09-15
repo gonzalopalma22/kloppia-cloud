@@ -8,8 +8,8 @@ import java.util.List;
 public interface ApunteRepository extends JpaRepository<Apunte, Long> {
 
     List<Apunte> findByMateriaIdAndUsuarioIdOrderByCreatedAtDesc(
-            Long materiaId, Long usuarioId);
+            Long materiaId, String usuarioId);
 
     List<Apunte> findByMateriaIdAndUsuarioIdAndTituloContainingIgnoreCaseOrderByCreatedAtDesc(
-            Long materiaId, Long usuarioId, String titulo);
+            Long materiaId, String usuarioId, String titulo);
 }

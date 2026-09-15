@@ -7,6 +7,7 @@ import com.klopp.apunte_service.dto.FlashcardDTO;
 import com.klopp.apunte_service.service.ApunteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,7 +29,8 @@ public class ApunteController {
             @PathVariable Long materiaId,
             @RequestParam("titulo") String titulo,
             @RequestParam("archivo") MultipartFile archivo,
-            @RequestHeader("X-User-Id") Long userId) throws IOException {
+            Authentication authentication) throws IOException {
+        String userId = authentication.getName();
         return ResponseEntity.ok(apunteService.crear(titulo, archivo, materiaId, userId));
     }
 
@@ -37,14 +39,16 @@ public class ApunteController {
             @PathVariable Long materiaId,
             @PathVariable Long id,
             @RequestBody Map<String, String> body,
-            @RequestHeader("X-User-Id") Long userId) {
+            Authentication authentication) {
+        String userId = authentication.getName();
         return ResponseEntity.ok(apunteService.editarTitulo(id, userId, body.get("titulo")));
     }
 
     @GetMapping
     public ResponseEntity<List<ApunteResponseDTO>> listar(
             @PathVariable Long materiaId,
-            @RequestHeader("X-User-Id") Long userId) {
+            Authentication authentication) {
+        String userId = authentication.getName();
         return ResponseEntity.ok(apunteService.listarPorMateria(materiaId, userId));
     }
 
@@ -52,7 +56,8 @@ public class ApunteController {
     public ResponseEntity<List<ApunteResponseDTO>> buscar(
             @PathVariable Long materiaId,
             @RequestParam String titulo,
-            @RequestHeader("X-User-Id") Long userId) {
+            Authentication authentication) {
+        String userId = authentication.getName();
         return ResponseEntity.ok(apunteService.buscarPorTitulo(materiaId, userId, titulo));
     }
 
@@ -60,7 +65,8 @@ public class ApunteController {
     public ResponseEntity<ApunteResponseDTO> obtener(
             @PathVariable Long materiaId,
             @PathVariable Long id,
-            @RequestHeader("X-User-Id") Long userId) {
+            Authentication authentication) {
+        String userId = authentication.getName();
         return ResponseEntity.ok(apunteService.obtenerPorId(id, userId));
     }
 
@@ -68,7 +74,8 @@ public class ApunteController {
     public ResponseEntity<?> eliminar(
             @PathVariable Long materiaId,
             @PathVariable Long id,
-            @RequestHeader("X-User-Id") Long userId) {
+            Authentication authentication) {
+        String userId = authentication.getName();
         apunteService.eliminar(id, userId);
         return ResponseEntity.ok("Apunte eliminado correctamente");
     }
@@ -80,12 +87,13 @@ public class ApunteController {
             @PathVariable Long materiaId,
             @PathVariable Long id,
             @RequestParam(defaultValue = "10") int cantidad,
-            @RequestHeader("X-User-Id") Long userId) {
+            Authentication authentication) {
 
         if (cantidad < 1 || cantidad > 20) {
             return ResponseEntity.badRequest().build();
         }
 
+        String userId = authentication.getName();
         return ResponseEntity.ok(apunteService.generarFlashcards(id, userId, cantidad));
     }
 
@@ -95,7 +103,8 @@ public class ApunteController {
     public ResponseEntity<List<Map<String, String>>> obtenerHistorial(
             @PathVariable Long materiaId,
             @PathVariable Long id,
-            @RequestHeader("X-User-Id") Long userId) {
+            Authentication authentication) {
+        String userId = authentication.getName();
         return ResponseEntity.ok(apunteService.obtenerHistorialChat(id, userId));
     }
 
@@ -104,13 +113,13 @@ public class ApunteController {
             @PathVariable Long materiaId,
             @PathVariable Long id,
             @RequestBody ChatRequestDTO body,
-            @RequestHeader("X-User-Id") Long userId) {
+            Authentication authentication) {
 
         if (body.pregunta() == null || body.pregunta().isBlank()) {
             return ResponseEntity.badRequest().build();
         }
 
-        
+        String userId = authentication.getName();
         return ResponseEntity.ok(apunteService.chat(id, userId, body.pregunta()));
     }
 }

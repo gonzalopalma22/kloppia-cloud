@@ -3,15 +3,11 @@ package com.klopp.apunte_service.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
+
 @Data
 @Entity
 @Table(name = "chat_mensajes")
-
 public class Chat {
-    
-
-   
-
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,10 +17,10 @@ public class Chat {
     private Long apunteId;
 
     @Column(name = "usuario_id", nullable = false)
-    private Long usuarioId;
+    private String usuarioId;
 
     @Column(nullable = false)
-    private String role; 
+    private String role;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;

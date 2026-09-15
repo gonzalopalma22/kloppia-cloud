@@ -37,6 +37,9 @@ class ApunteServiceTest {
 
     private Apunte apunte;
 
+    private static final String USUARIO_ID = "a1b2c3d4-e5f6-7890-abcd-ef1234567890";
+    private static final String OTRO_USUARIO_ID = "otro-usuario-id";
+
     @BeforeEach
     void setUp() {
         apunte = new Apunte();
@@ -45,7 +48,7 @@ class ApunteServiceTest {
         apunte.setResumen("Resumen generado por IA");
         apunte.setNombreArchivo("apunte.pdf");
         apunte.setMateriaId(1L);
-        apunte.setUsuarioId(1L);
+        apunte.setUsuarioId(USUARIO_ID);
         apunte.setCreatedAt(LocalDateTime.now());
     }
 
@@ -56,7 +59,7 @@ class ApunteServiceTest {
         when(geminiService.generarResumen(any(byte[].class))).thenReturn("Resumen generado por IA");
         when(apunteRepository.save(any(Apunte.class))).thenReturn(apunte);
 
-        ApunteResponseDTO response = apunteService.crear("Mi apunte", archivo, 1L, 1L);
+        ApunteResponseDTO response = apunteService.crear("Mi apunte", archivo, 1L, USUARIO_ID);
 
         assertNotNull(response);
         assertEquals("Mi apunte", response.getTitulo());
@@ -66,10 +69,10 @@ class ApunteServiceTest {
 
     @Test
     void listarPorMateria_retornaLista() {
-        when(apunteRepository.findByMateriaIdAndUsuarioIdOrderByCreatedAtDesc(1L, 1L))
+        when(apunteRepository.findByMateriaIdAndUsuarioIdOrderByCreatedAtDesc(1L, USUARIO_ID))
                 .thenReturn(List.of(apunte));
 
-        List<ApunteResponseDTO> response = apunteService.listarPorMateria(1L, 1L);
+        List<ApunteResponseDTO> response = apunteService.listarPorMateria(1L, USUARIO_ID);
 
         assertNotNull(response);
         assertEquals(1, response.size());
@@ -80,7 +83,7 @@ class ApunteServiceTest {
     void obtenerPorId_exitoso() {
         when(apunteRepository.findById(1L)).thenReturn(Optional.of(apunte));
 
-        ApunteResponseDTO response = apunteService.obtenerPorId(1L, 1L);
+        ApunteResponseDTO response = apunteService.obtenerPorId(1L, USUARIO_ID);
 
         assertNotNull(response);
         assertEquals(1L, response.getId());
@@ -92,7 +95,7 @@ class ApunteServiceTest {
         when(apunteRepository.findById(99L)).thenReturn(Optional.empty());
 
         RuntimeException ex = assertThrows(RuntimeException.class,
-                () -> apunteService.obtenerPorId(99L, 1L));
+                () -> apunteService.obtenerPorId(99L, USUARIO_ID));
 
         assertEquals("Apunte no encontrado", ex.getMessage());
     }
@@ -102,16 +105,16 @@ class ApunteServiceTest {
         when(apunteRepository.findById(1L)).thenReturn(Optional.of(apunte));
 
         RuntimeException ex = assertThrows(RuntimeException.class,
-                () -> apunteService.obtenerPorId(1L, 99L));
+                () -> apunteService.obtenerPorId(1L, OTRO_USUARIO_ID));
 
-        assertEquals("No tienes permiso para ver este apunte", ex.getMessage());
+        assertEquals("No tienes permiso para acceder a este apunte", ex.getMessage());
     }
 
     @Test
     void eliminar_exitoso() {
         when(apunteRepository.findById(1L)).thenReturn(Optional.of(apunte));
 
-        apunteService.eliminar(1L, 1L);
+        apunteService.eliminar(1L, USUARIO_ID);
 
         verify(apunteRepository, times(1)).deleteById(1L);
     }
@@ -121,8 +124,8 @@ class ApunteServiceTest {
         when(apunteRepository.findById(1L)).thenReturn(Optional.of(apunte));
 
         RuntimeException ex = assertThrows(RuntimeException.class,
-                () -> apunteService.eliminar(1L, 99L));
+                () -> apunteService.eliminar(1L, OTRO_USUARIO_ID));
 
-        assertEquals("No tienes permiso para eliminar este apunte", ex.getMessage());
+        assertEquals("No tienes permiso para acceder a este apunte", ex.getMessage());
     }
 }

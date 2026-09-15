@@ -27,7 +27,7 @@ public class ApunteService {
     // ── Apuntes ───────────────────────────────────────────────────────────────
 
     public ApunteResponseDTO crear(String titulo, MultipartFile archivo,
-            Long materiaId, Long usuarioId) throws IOException {
+            Long materiaId, String usuarioId) throws IOException {
         byte[] pdfBytes = archivo.getBytes();
         String resumen = geminiService.generarResumen(pdfBytes);
         Apunte apunte = new Apunte();
@@ -39,13 +39,13 @@ public class ApunteService {
         return mapToResponse(apunteRepository.save(apunte));
     }
 
-    public ApunteResponseDTO editarTitulo(Long id, Long usuarioId, String titulo) {
+    public ApunteResponseDTO editarTitulo(Long id, String usuarioId, String titulo) {
         Apunte apunte = obtenerApunteValidado(id, usuarioId);
         apunte.setTitulo(titulo);
         return mapToResponse(apunteRepository.save(apunte));
     }
 
-    public List<ApunteResponseDTO> listarPorMateria(Long materiaId, Long usuarioId) {
+    public List<ApunteResponseDTO> listarPorMateria(Long materiaId, String usuarioId) {
         return apunteRepository
                 .findByMateriaIdAndUsuarioIdOrderByCreatedAtDesc(materiaId, usuarioId)
                 .stream()
@@ -53,7 +53,7 @@ public class ApunteService {
                 .collect(Collectors.toList());
     }
 
-    public List<ApunteResponseDTO> buscarPorTitulo(Long materiaId, Long usuarioId, String titulo) {
+    public List<ApunteResponseDTO> buscarPorTitulo(Long materiaId, String usuarioId, String titulo) {
         return apunteRepository
                 .findByMateriaIdAndUsuarioIdAndTituloContainingIgnoreCaseOrderByCreatedAtDesc(
                         materiaId, usuarioId, titulo)
@@ -62,11 +62,11 @@ public class ApunteService {
                 .collect(Collectors.toList());
     }
 
-    public ApunteResponseDTO obtenerPorId(Long id, Long usuarioId) {
+    public ApunteResponseDTO obtenerPorId(Long id, String usuarioId) {
         return mapToResponse(obtenerApunteValidado(id, usuarioId));
     }
 
-    public void eliminar(Long id, Long usuarioId) {
+    public void eliminar(Long id, String usuarioId) {
         obtenerApunteValidado(id, usuarioId);
         chatRepository.deleteByApunteIdAndUsuarioId(id, usuarioId);
         apunteRepository.deleteById(id);
@@ -74,7 +74,7 @@ public class ApunteService {
 
     // ── Flashcards ────────────────────────────────────────────────────────────
 
-    public List<FlashcardDTO> generarFlashcards(Long id, Long usuarioId, int cantidad) {
+    public List<FlashcardDTO> generarFlashcards(Long id, String usuarioId, int cantidad) {
         Apunte apunte = obtenerApunteValidado(id, usuarioId);
 
         if (apunte.getResumen() == null || apunte.getResumen().isBlank()) {
@@ -90,7 +90,7 @@ public class ApunteService {
 
     // ── Chat ──────────────────────────────────────────────────────────────────
 
-    public List<Map<String, String>> obtenerHistorialChat(Long id, Long usuarioId) {
+    public List<Map<String, String>> obtenerHistorialChat(Long id, String usuarioId) {
         obtenerApunteValidado(id, usuarioId);
         return chatRepository
                 .findByApunteIdAndUsuarioIdOrderByCreatedAtAsc(id, usuarioId)
@@ -99,7 +99,7 @@ public class ApunteService {
                 .collect(Collectors.toList());
     }
 
-    public ChatResponseDTO chat(Long id, Long usuarioId, String pregunta) {
+    public ChatResponseDTO chat(Long id, String usuarioId, String pregunta) {
         Apunte apunte = obtenerApunteValidado(id, usuarioId);
 
         if (apunte.getResumen() == null || apunte.getResumen().isBlank()) {
@@ -110,7 +110,6 @@ public class ApunteService {
             throw new IllegalArgumentException("La pregunta no puede estar vacía");
         }
 
-        // Leer historial desde la DB — fuente de verdad única
         List<Map<String, String>> historial = chatRepository
                 .findByApunteIdAndUsuarioIdOrderByCreatedAtAsc(id, usuarioId)
                 .stream()
@@ -119,7 +118,6 @@ public class ApunteService {
 
         String respuesta = geminiService.chat(apunte.getResumen(), historial, pregunta);
 
-        // Guardar mensaje del usuario
         Chat mensajeUsuario = new Chat();
         mensajeUsuario.setApunteId(id);
         mensajeUsuario.setUsuarioId(usuarioId);
@@ -127,7 +125,6 @@ public class ApunteService {
         mensajeUsuario.setContent(pregunta);
         chatRepository.save(mensajeUsuario);
 
-        // Guardar respuesta del modelo
         Chat mensajeModelo = new Chat();
         mensajeModelo.setApunteId(id);
         mensajeModelo.setUsuarioId(usuarioId);
@@ -140,7 +137,7 @@ public class ApunteService {
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
-    private Apunte obtenerApunteValidado(Long id, Long usuarioId) {
+    private Apunte obtenerApunteValidado(Long id, String usuarioId) {
         Apunte apunte = apunteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Apunte no encontrado"));
         if (!apunte.getUsuarioId().equals(usuarioId)) {

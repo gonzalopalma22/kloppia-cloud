@@ -30,7 +30,7 @@ public class Apunte {
     private Long materiaId;
 
     @Column(name = "usuario_id", nullable = false)
-    private Long usuarioId;
+    private String usuarioId;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -39,4 +39,4 @@ public class Apunte {
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
     }
-} 
+}

@@ -8,8 +8,8 @@ import java.util.List;
 public interface ChatRepository extends JpaRepository<Chat, Long> {
 
     List<Chat> findByApunteIdAndUsuarioIdOrderByCreatedAtAsc(
-        Long apunteId, Long usuarioId
+            Long apunteId, String usuarioId
     );
 
-    void deleteByApunteIdAndUsuarioId(Long apunteId, Long usuarioId);
+    void deleteByApunteIdAndUsuarioId(Long apunteId, String usuarioId);
 }
